@@ -1,0 +1,124 @@
+<html>
+
+<head>
+    <title>Media Example</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *"
+    />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+
+</head>
+
+<body>
+    <div id="container">
+        <div class="header text-center font-weight-bold">
+            <h1>Media Demo</h1>
+        </div>
+        <button type="button" class="btn btn-primary btn-lg col-md-3" onclick="playAudio('http://music.chiasenhac.vn/data0108/121/b8fd3ae6390bbea12ad4c195384cabfd.mp3');">Play Audio</button>
+        <button type="button" class="btn btn-primary btn-lg col-md-3" onclick="pauseAudio();">Pause Playing Audio</button>
+        <button type="button" class="btn btn-primary btn-lg col-md-3" onclick="getDuration('http://music.chiasenhac.vn/data0108/121/b8fd3ae6390bbea12ad4c195384cabfd.mp3');">
+            Get Duration</button>
+        <button type="button" class="btn btn-primary btn-lg col-md-3" onclick="upVolumn();">Turn on Volumn</button>
+        <button type="button" class="btn btn-primary btn-lg col-md-3" onclick="downVolumn();">turn down Volumn</button>
+        <p id="audio_position"></p>
+        <p id="audio_duration"></p>
+
+
+    </div>
+    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+
+        document.addEventListener("deviceready", onDeviceReady, false);
+
+        var volume = 0;
+
+        function onDeviceReady() {
+        }
+
+        var my_media = null;
+        var mediaTimer = null;
+        function playAudio(src) {
+            // Create Media object from src
+            my_media = new Media(src, onSuccess, onError);
+
+            // Play audio
+            my_media.play();
+
+            // Update my_media position every second
+            if (mediaTimer == null) {
+                mediaTimer = setInterval(function () {
+                    // get my_media position
+                    my_media.getCurrentPosition(
+                        // success callback
+                        function (position) {
+                            if (position > -1) {
+                                setAudioPosition((position) + " sec");
+                            }
+                        },
+                        // error callback
+                        function (e) {
+                            console.log("Error getting pos=" + e);
+                            setAudioPosition("Error: " + e);
+                        }
+                    );
+                }, 1000);
+            }
+        }
+
+        function pauseAudio() {
+            if (my_media) {
+                my_media.pause();
+            }
+        }
+
+        function upVolumn() {
+            if (my_media) {
+                my_media.setVolume("1.0");
+            }
+        }
+
+        function downVolumn() {
+            if (my_media) {
+                my_media.setVolume("0.0");
+            }
+        }
+
+
+
+
+        function onSuccess() {
+            console.log("playAudio():Audio Success");
+        }
+
+        function onError(error) {
+            alert('code: ' + error.code + '\n' +
+                'message: ' + error.message + '\n');
+        }
+
+        // Set audio position
+        //
+        function setAudioPosition(position) {
+            document.getElementById('audio_position').innerHTML = position;
+        }
+
+        function getDuration(src) {
+            var my_media = new Media(src, onSuccess, onError);
+            var counter = 0;
+            var timerDur = setInterval(function () {
+                counter = counter + 100;
+                if (counter > 2000) {
+                    clearInterval(timerDur);
+                }
+                var dur = my_media.getDuration();
+                if (dur > 0) {
+                    clearInterval(timerDur);
+                    document.getElementById('audio_duration').innerHTML = (dur) + " sec";
+                }
+            }, 100);
+        }
+
+    </script>
+</body>
+
+</html>
